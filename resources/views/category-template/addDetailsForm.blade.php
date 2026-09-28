@@ -176,41 +176,51 @@
 
             addBtn.addEventListener('click', function() {
                 const div = document.createElement('div');
-                div.classList.add('d-flex', 'gap-2', 'align-items-start', 'mb-2', 'image-row');
+                div.classList.add('card', 'mb-3', 'image-row', 'new-image-card');
 
                  div.innerHTML = `
-            <div class="flex-grow-1">
-                <label class="small text-muted">${origin === 'video' ? 'Video' : 'Image'}</label>
-                <input type="file" name="images[]" accept="${origin === 'video' ? 'video/*' : '.webp'}" class="form-control file-input" required>
-                ${origin === 'video' ? '<input type="hidden" name="video_thumbnails[]" class="thumbnail-input">' : ''}
-                ${origin === 'video' ? '<div class="mt-1"><img class="thumbnail-preview" style="max-height: 50px; display:none;"></div>' : '<div class="mt-2 new-img-preview-wrap" style="display:none;"><img class="new-img-preview" style="width:100%;height:auto;border-radius:6px;border:1px solid #dee2e6;" alt="Preview"></div>'}
-            </div>
-            <div class="flex-grow-1">
-                <label class="small text-muted">Prompt</label>
-                <input type="text" name="prompts[]" placeholder="Enter prompt" class="form-control prompt-input">
-                <small class="text-muted"><span class="prompt-counter">0</span>/2990</small>
-            </div>
-            <div class="flex-grow-1">
-                <label class="small text-muted">${origin === 'video' ? 'Video' : 'Image'} Title</label>
-                <input type="text" name="${origin === 'video' ? 'video_title' : 'image_title'}[]" placeholder="Enter ${origin === 'video' ? 'video' : 'image'} title" class="form-control">
-            </div>
-            <div class="flex-grow-1">
-                <label class="small text-muted">Name Change</label>
-                <div class="form-check form-switch mb-1">
-                    <input class="form-check-input" type="checkbox" name="name_change[]" value="1">
-                    <label class="form-check-label">Enable</label>
+            <div class="card-body p-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="small text-muted d-block mb-1">${origin === 'video' ? 'Video' : 'Image'}</label>
+                        <input type="file" name="images[]" accept="${origin === 'video' ? 'video/*' : '.webp'}" class="form-control form-control-sm file-input" required>
+                        ${origin === 'video'
+                            ? '<input type="hidden" name="video_thumbnails[]" class="thumbnail-input"><div class="mt-2"><img class="thumbnail-preview" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid #dee2e6;display:none;"></div>'
+                            : '<div class="mt-2 new-img-preview-wrap" style="display:none;"><img class="new-img-preview" style="width:100%;height:auto;border-radius:8px;border:1px solid #dee2e6;" alt="Preview"></div>'}
+                    </div>
+                    <div class="col-md-8 d-flex flex-column">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label class="small text-muted mb-1">${origin === 'video' ? 'Video' : 'Image'} Title</label>
+                                <input type="text" name="${origin === 'video' ? 'video_title' : 'image_title'}[]" placeholder="Enter ${origin === 'video' ? 'video' : 'image'} title" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="small text-muted mb-1 d-block">Name Change</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="name_change[]" value="1">
+                                    <label class="form-check-label small">Enable</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 d-flex flex-column flex-grow-1">
+                            <label class="small text-muted mb-1">Prompt</label>
+                            <textarea name="prompts[]" placeholder="Enter prompt" class="form-control form-control-sm prompt-input" style="flex:1 1 auto;min-height:200px;resize:vertical;"></textarea>
+                            <small class="text-muted mt-1"><span class="prompt-counter">0</span>/2990</small>
+                        </div>
+                    </div>
+                    <div class="col-12 text-end border-top pt-2 mt-1">
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-new"><i class="bi bi-trash me-1"></i>Remove</button>
+                    </div>
                 </div>
-            </div>
-            <div class="d-flex align-items-end">
-                <button type="button" class="btn btn-danger btn-sm remove-new">X</button>
             </div>
         `;
                 wrapper.appendChild(div);
             });
 
             wrapper.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-new')) {
-                    e.target.closest('.image-row').remove();
+                const removeBtn = e.target.closest('.remove-new');
+                if (removeBtn) {
+                    removeBtn.closest('.image-row').remove();
                 }
             });
 
@@ -226,7 +236,7 @@
                     if (!isWebp) {
                         e.target.value = '';
                         // Hide preview if shown
-                        const prevWrap = e.target.closest('.flex-grow-1').querySelector('.new-img-preview-wrap');
+                        const prevWrap = e.target.closest('.image-row').querySelector('.new-img-preview-wrap');
                         if (prevWrap) { prevWrap.style.display = 'none'; }
                         Swal.fire({
                             icon: 'error',
@@ -239,8 +249,8 @@
                     // Show full image preview
                     const reader = new FileReader();
                     reader.onload = function(ev) {
-                        const wrap = e.target.closest('.flex-grow-1').querySelector('.new-img-preview-wrap');
-                        const img  = e.target.closest('.flex-grow-1').querySelector('.new-img-preview');
+                        const wrap = e.target.closest('.image-row').querySelector('.new-img-preview-wrap');
+                        const img  = e.target.closest('.image-row').querySelector('.new-img-preview');
                         if (wrap && img) { img.src = ev.target.result; wrap.style.display = 'block'; }
                     };
                     reader.readAsDataURL(file);
@@ -279,7 +289,7 @@
                     const dataURL = canvas.toDataURL('image/jpeg', 0.7);
                     
                     // Find sibling input and preview
-                    const parent = inputElement.closest('div');
+                    const parent = inputElement.closest('.image-row') || inputElement.closest('div');
                     const thumbInput = parent.querySelector('.thumbnail-input');
                     const thumbPreview = parent.querySelector('.thumbnail-preview');
 
