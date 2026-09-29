@@ -578,7 +578,7 @@
 
             // Double-click prompt cell to copy full prompt to clipboard
             $(document).on('dblclick', '.prompt-copy', function () {
-                var fullPrompt = $(this).data('full-prompt');
+                var fullPrompt = $(this).attr('data-full-prompt');
                 if (!fullPrompt) return;
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(fullPrompt).then(function () {
