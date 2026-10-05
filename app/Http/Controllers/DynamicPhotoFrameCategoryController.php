@@ -146,6 +146,9 @@ class DynamicPhotoFrameCategoryController extends Controller
 
         DynamicPhotoFrame::where('dynamic_photo_frame_category_id', $id)->delete();
 
+        // Remove the Baby AI Home Slider entry that points to this category
+        \App\Models\BabyAiHomeSlider::deleteBySource('dynamic_frame', $id);
+
         $category->delete();
 
         return redirect()->route('dynamic-photo-frame.categories.index')->with('success', 'Dynamic Photo Frame Category and all its frames deleted successfully!');

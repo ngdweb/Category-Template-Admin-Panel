@@ -143,6 +143,9 @@ class AiVideoCategoryController extends Controller
         // We should also delete related AiBabyVideo items if any
         \App\Models\AiBabyVideo::where('category_id', $category->id)->delete();
 
+        // Remove the Baby AI Home Slider entry that points to this category
+        \App\Models\BabyAiHomeSlider::deleteBySource('video', $category->id);
+
         $category->delete();
 
         return redirect()->route('ai-baby-video.categories.index')->with('success', 'Category and all videos deleted successfully!');

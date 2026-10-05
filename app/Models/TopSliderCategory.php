@@ -46,4 +46,30 @@ class TopSliderCategory extends Model
         }
         return 'Unknown';
     }
+
+    // Remove Top Slider categories (with their items + files) that point to a deleted
+    // source Ngendev category. Call this BEFORE deleting the source so category_name resolves.
+    public static function deleteBySource(string $fileType, $categoryId): void
+    {
+        $categories = self::where('file_type', $fileType)
+            ->where('category_id', $categoryId)
+            ->get();
+
+        foreach ($categories as $category) {
+            $name = $category->category_name;
+
+            $catBasePath = public_path('upload/top_slider/categories/' . $name);
+            if (\Illuminate\Support\Facades\File::exists($catBasePath)) {
+                \Illuminate\Support\Facades\File::deleteDirectory($catBasePath);
+            }
+
+            $itemBasePath = public_path('upload/top_slider/items/' . $name);
+            if (\Illuminate\Support\Facades\File::exists($itemBasePath)) {
+                \Illuminate\Support\Facades\File::deleteDirectory($itemBasePath);
+            }
+
+            TopSliderItem::where('top_slider_category_id', $category->id)->delete();
+            $category->delete();
+        }
+    }
 }

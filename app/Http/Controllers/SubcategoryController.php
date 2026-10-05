@@ -177,6 +177,12 @@ class SubcategoryController extends Controller
         if (File::exists($folderPath)) {
             File::deleteDirectory($folderPath);
         }
+
+        // Remove the Baby AI Home Slider entry that points to this image subcategory
+        if (!$is_video) {
+            \App\Models\BabyAiHomeSlider::deleteBySource('image', $subcategory->id);
+        }
+
         $subcategory->delete();
 
         Cache::forget('sidebar.subcategories_grouped');

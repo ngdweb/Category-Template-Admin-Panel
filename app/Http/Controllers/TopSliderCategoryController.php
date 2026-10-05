@@ -215,6 +215,7 @@ class TopSliderCategoryController extends Controller
             return redirect()->route('top-slider.categories.index');
         }
         $categories = TopSliderCategory::orderBy('sort_order', 'asc')->orderBy('updated_at', 'desc')->get();
+        $categories->each->append('category_name');
         return response()->json(['categories' => $categories]);
     }
 

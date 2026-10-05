@@ -52,4 +52,22 @@ class BabyAiHomeSlider extends Model
         }
         return 'Unknown';
     }
+
+    // Remove any home-slider entries (and their files) that point to a deleted source category.
+    public static function deleteBySource(string $sourceType, $sourceId): void
+    {
+        $sliders = self::where('source_type', $sourceType)
+            ->where('source_id', $sourceId)
+            ->get();
+
+        foreach ($sliders as $slider) {
+            $folder = public_path('upload/baby_ai_home_slider/' . $slider->source_type);
+            foreach ([$slider->image, $slider->video, $slider->video_thumbnail] as $f) {
+                if ($f && file_exists($folder . '/' . $f)) {
+                    @unlink($folder . '/' . $f);
+                }
+            }
+            $slider->delete();
+        }
+    }
 }

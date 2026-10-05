@@ -153,10 +153,14 @@
                 }
             });
 
-            // Block submit when any prompt is over the limit
+            const origin = '{{ request('origin') }}';
+
+            // Block submit for client-detectable errors so a server reject (which
+            // wipes the already-selected video + generated thumbnail) never happens.
             const detailsForm = document.getElementById('saveDetailsForm');
             if (detailsForm) {
                 detailsForm.addEventListener('submit', function (e) {
+                    // 1) Prompt length
                     const overInputs = Array.from(document.querySelectorAll('.prompt-input'))
                         .filter(el => el.value.length > PROMPT_LIMIT);
                     if (overInputs.length > 0) {
@@ -166,11 +170,43 @@
                             title: 'Prompt too long',
                             text: overInputs.length + ' prompt(s) exceed ' + PROMPT_LIMIT + ' characters. Please shorten them and try again.'
                         });
+                        return;
+                    }
+
+                    // 2) Video-specific pre-checks (only for new video rows)
+                    if (origin === 'video') {
+                        const MAX_VIDEO_MB = 50; // server limit is 51200 KB
+                        const fileInputs = Array.from(document.querySelectorAll('#newImagesWrapper .file-input'));
+                        for (const input of fileInputs) {
+                            const file = input.files[0];
+                            if (!file) continue;
+
+                            if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+                                e.preventDefault();
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Video too large',
+                                    text: 'Each video must be ' + MAX_VIDEO_MB + 'MB or smaller. Please choose a smaller file.'
+                                });
+                                return;
+                            }
+
+                            const row = input.closest('.image-row');
+                            const thumb = row ? row.querySelector('.thumbnail-input') : null;
+                            if (thumb && !thumb.value) {
+                                e.preventDefault();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Please wait',
+                                    text: 'The video thumbnail is still being generated. Wait a moment and click Save again.'
+                                });
+                                return;
+                            }
+                        }
                     }
                 });
             }
 
-            const origin = '{{ request('origin') }}';
             const wrapper = document.getElementById('newImagesWrapper');
             const addBtn = document.getElementById('addImageBtn');
 

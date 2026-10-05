@@ -237,6 +237,9 @@ class NgendevCategoryController extends Controller
             }
         }
 
+        // Remove Top Slider categories (image) that point to this Ngendev category
+        \App\Models\TopSliderCategory::deleteBySource('image', $category->id);
+
         $category->delete();
 
         return redirect()->route('ngendev.categories.index')->with('success', 'Category and all images deleted successfully!');

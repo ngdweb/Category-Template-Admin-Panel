@@ -301,6 +301,9 @@
         const charCount = document.getElementById("charCount");
         const form = document.getElementById("videoForm");
 
+        const HAS_EXISTING_VIDEO = {{ isset($video) && $video->video_path ? 'true' : 'false' }};
+        const HAS_EXISTING_THUMB = {{ isset($video) && $video->video_thumbnail ? 'true' : 'false' }};
+
         function updateCount() {
             const len = textarea.value.length;
             charCount.textContent = len;
@@ -313,13 +316,48 @@
         updateCount();
         textarea.addEventListener("input", updateCount);
 
+        // Validate everything the server requires BEFORE submitting, so a server
+        // reject never reloads the page and wipes the already-selected video/thumbnail.
         form.addEventListener("submit", function (e) {
+            const categoryInput = document.getElementById('category_id');
+            const videoInput = document.getElementById('video_path');
+            const thumbInput = document.getElementById('video_thumbnail');
+            const titleInput = document.getElementById('video_title');
+            const removeVideo = document.getElementById('remove_video').value === '1';
+            const removeThumb = document.getElementById('remove_thumbnail').value === '1';
+
+            const hasVideo = (videoInput.files && videoInput.files.length > 0) || (HAS_EXISTING_VIDEO && !removeVideo);
+            const hasThumb = (thumbInput.files && thumbInput.files.length > 0) || (HAS_EXISTING_THUMB && !removeThumb);
+
+            const errs = [];
+
             if (textarea.value.length > PROMPT_LIMIT) {
+                errs.push('AI Prompt must not exceed ' + PROMPT_LIMIT + ' characters (current: ' + textarea.value.length + ').');
+            }
+            if (!categoryInput.value) errs.push('Please select a category.');
+            if (!hasVideo) errs.push('Please choose a video file.');
+            if (!hasThumb) errs.push('Please choose a video thumbnail.');
+            if (!titleInput.value.trim()) errs.push('Please enter a video title.');
+
+            if (videoInput.files && videoInput.files[0]) {
+                const vf = videoInput.files[0];
+                const vext = vf.name.split('.').pop().toLowerCase();
+                if (['mp4', 'mov', 'avi', 'wmv'].indexOf(vext) === -1) errs.push('Video must be mp4, mov, avi or wmv.');
+                if (vf.size > 50 * 1024 * 1024) errs.push('Video must be 50MB or smaller.');
+            }
+            if (thumbInput.files && thumbInput.files[0]) {
+                const tf = thumbInput.files[0];
+                const text = tf.name.split('.').pop().toLowerCase();
+                if (['jpeg', 'jpg', 'png', 'gif', 'webp'].indexOf(text) === -1) errs.push('Thumbnail must be jpeg, jpg, png, gif or webp.');
+                if (tf.size > 5 * 1024 * 1024) errs.push('Thumbnail must be 5MB or smaller.');
+            }
+
+            if (errs.length) {
                 e.preventDefault();
                 Swal.fire({
                     icon: 'error',
-                    title: 'Prompt too long',
-                    text: 'AI Prompt must not exceed ' + PROMPT_LIMIT + ' characters. Current: ' + textarea.value.length + '.'
+                    title: 'Please complete the form',
+                    html: errs.join('<br>')
                 });
             }
         });

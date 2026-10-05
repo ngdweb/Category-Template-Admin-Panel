@@ -165,25 +165,37 @@
             }
         }
 
+        const COUPLE_ACTIVE = {{ isset($coupleActive) && $coupleActive ? 'true' : 'false' }};
+
         document.addEventListener('DOMContentLoaded', function() {
             const typeSelect = document.getElementById('type');
             const statusCheck = document.getElementById('status');
             const statusHelp = document.getElementById('status-help');
 
-            function updateStatusVisibility() {
+            function updateStatusVisibility(isTypeChange) {
                 if (typeSelect.value === 'Solo') {
                     statusCheck.checked = true;
                     statusCheck.disabled = true;
+                    statusHelp.textContent = 'Solo categories are always active.';
                     statusHelp.style.display = 'block';
                 } else {
-                    statusCheck.disabled = false;
-                    statusHelp.style.display = 'none';
+                    // Couple
+                    if (!COUPLE_ACTIVE) {
+                        statusCheck.checked = false;
+                        statusCheck.disabled = true;
+                        statusHelp.textContent = 'Global Couple Status is OFF — this category will be saved as inactive.';
+                    } else {
+                        statusCheck.disabled = false;
+                        if (isTypeChange) statusCheck.checked = true;
+                        statusHelp.textContent = 'Global Couple Status is ON — you can set this category active or inactive.';
+                    }
+                    statusHelp.style.display = 'block';
                 }
             }
 
-            typeSelect.addEventListener('change', updateStatusVisibility);
-            
-            updateStatusVisibility();
+            typeSelect.addEventListener('change', function() { updateStatusVisibility(true); });
+
+            updateStatusVisibility(false);
         });
     </script>
 @endsection

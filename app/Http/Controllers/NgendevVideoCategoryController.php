@@ -39,7 +39,8 @@ class NgendevVideoCategoryController extends Controller
 
     public function create()
     {
-        return view('ngendev_video_category.form');
+        $coupleActive = (bool) (AiVideoNgdSetting::value('couple_active') ?? 0);
+        return view('ngendev_video_category.form', compact('coupleActive'));
     }
 
     public function store(Request $request)
@@ -145,7 +146,8 @@ class NgendevVideoCategoryController extends Controller
     public function edit($id)
     {
         $category = NgendevVideoCategory::findOrFail($id);
-        return view('ngendev_video_category.form', compact('category'));
+        $coupleActive = (bool) (AiVideoNgdSetting::value('couple_active') ?? 0);
+        return view('ngendev_video_category.form', compact('category', 'coupleActive'));
     }
 
     public function update(Request $request, $id)
@@ -234,6 +236,9 @@ class NgendevVideoCategoryController extends Controller
             }
         }
 
+        // Remove Top Slider categories (video) that point to this Ngendev video category
+        \App\Models\TopSliderCategory::deleteBySource('video', $category->id);
+
         $category->delete();
 
         return redirect()->route('ngendev-video-categories.index')->with('success', 'Category deleted successfully!');
@@ -289,10 +294,6 @@ class NgendevVideoCategoryController extends Controller
 
         $category = NgendevVideoCategory::find($request->id);
 
-        if ($category->type === 'Solo' && $request->status == 0) {
-            return response()->json(['success' => false, 'message' => 'Solo categories must be active!']);
-        }
-
         if ($category->type === 'Couple' && $request->status == 1) {
             $coupleActive = AiVideoNgdSetting::value('couple_active');
             if (!$coupleActive) {
@@ -318,6 +319,9 @@ class NgendevVideoCategoryController extends Controller
 
         if ($request->type === 'Solo') {
             $category->status = 1;
+        } elseif ($request->type === 'Couple') {
+            $coupleActive = AiVideoNgdSetting::value('couple_active');
+            $category->status = $coupleActive ? 1 : 0;
         }
 
         $category->save();
