@@ -82,6 +82,7 @@ Route::middleware(['admin_auth'])->group(function () {
             Route::post('/images-update-order', [NgendevImageController::class, 'updateOrder'])->name('images.updateOrder');
             Route::get('/images-name-change-stats', [NgendevImageController::class, 'categoryNameChangeStats'])->name('images.nameChangeStats');
             Route::post('/images-bulk-name-change', [NgendevImageController::class, 'bulkToggleNameChange'])->name('images.bulkNameChange');
+            Route::post('/images-update-status', [NgendevImageController::class, 'updateStatus'])->name('images.updateStatus');
         });
 
     // Ngendev Categories Routes

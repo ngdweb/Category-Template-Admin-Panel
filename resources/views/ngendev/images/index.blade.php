@@ -600,6 +600,33 @@
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Prompt copied!', showConfirmButton: false, timer: 2000 });
             }
 
+            // Per-image On/Off toggle (delegated so it works after AJAX table swaps)
+            $(document).on('change', '.ngd-img-status-toggle', function () {
+                var $toggle = $(this);
+                var id = $toggle.data('id');
+                var status = $toggle.is(':checked') ? 1 : 0;
+                var $badge = $('#img-status-badge-' + id);
+                $.ajax({
+                    url: "{{ route('ngendev.images.updateStatus') }}",
+                    type: 'POST',
+                    data: { _token: "{{ csrf_token() }}", id: id, status: status },
+                    success: function (res) {
+                        if (res.success) {
+                            if (status) { $badge.removeClass('bg-secondary').addClass('bg-success').text('On'); }
+                            else { $badge.removeClass('bg-success').addClass('bg-secondary').text('Off'); }
+                            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 2000 });
+                        } else {
+                            $toggle.prop('checked', !status);
+                            Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Failed to update status' });
+                        }
+                    },
+                    error: function () {
+                        $toggle.prop('checked', !status);
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update status' });
+                    }
+                });
+            });
+
             $('#cancelEdit').on('click', function () { resetForm(); });
 
             $('#ngendevImageForm').on('submit', function (e) {

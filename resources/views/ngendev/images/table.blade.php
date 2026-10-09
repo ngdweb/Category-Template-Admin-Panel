@@ -4,9 +4,9 @@
             <tr>
                 <th class="col-id">#ID</th>
                 <th class="col-category">Category</th>
-                <th class="col-model">Model</th>
                 <th class="col-thumb">Image</th>
                 <th class="col-prompt">Prompt</th>
+                <th class="col-status">Status</th>
                 <th class="col-action text-end">Actions</th>
             </tr>
         </thead>
@@ -15,7 +15,6 @@
                 <tr id="row-{{ $img->id }}">
                     <td><span class="badge bg-secondary">{{ $img->id }}</span></td>
                     <td><strong>{{ $img->category?->category_name ?? 'N/A' }}</strong></td>
-                    <td>{{ $img->ai_model ?? 'Ngendev Image' }}</td>
                     <td>
                         @if ($img->image_path && $img->category)
                             <img loading="lazy" decoding="async" src="{{ asset('upload/ngendev/images/' . $img->category?->category_name . '/category_image/' . $img->image_path) }}" class="img-thumb" alt="">
@@ -33,6 +32,15 @@
                     <td>
                         <div class="text-truncate prompt-copy" style="font-size:.85rem;cursor:copy;" title="Double-click to copy full prompt" data-full-prompt="{{ $fullPrompt }}">
                             {{ \Illuminate\Support\Str::limit($fullPrompt, 120) }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="form-check form-switch d-flex align-items-center gap-2 m-0">
+                            <input class="form-check-input ngd-img-status-toggle" type="checkbox" role="switch"
+                                id="img-status-{{ $img->id }}" data-id="{{ $img->id }}" {{ ($img->status ?? 1) ? 'checked' : '' }}>
+                            <span id="img-status-badge-{{ $img->id }}" class="badge {{ ($img->status ?? 1) ? 'bg-success' : 'bg-secondary' }}">
+                                {{ ($img->status ?? 1) ? 'On' : 'Off' }}
+                            </span>
                         </div>
                     </td>
                     <td class="text-end">

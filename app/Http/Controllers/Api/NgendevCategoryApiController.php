@@ -44,6 +44,7 @@ class NgendevCategoryApiController extends Controller
             $encodedCategory = str_replace(' ', '%20', $category->category_name);
 
             $images = NgendevImage::where('category_id', $category->id)
+                ->where('status', 1)
                 ->select('id', 'ai_prompt', 'image_path', 'no_of_image', 'name_change', 'image_hint') // removed sort_order
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
@@ -190,6 +191,7 @@ class NgendevCategoryApiController extends Controller
             // Get first image from each remaining category (same order as getCategories)
             foreach ($categories as $category) {
                 $latestImage = NgendevImage::where('category_id', $category->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'image_path', 'category_id', 'no_of_image', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -219,6 +221,7 @@ class NgendevCategoryApiController extends Controller
             // Add Exclusive first record
             if ($exclusiveCategory) {
                 $exclusiveImage = NgendevImage::where('category_id', $exclusiveCategory->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'image_path', 'category_id', 'no_of_image', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -248,6 +251,7 @@ class NgendevCategoryApiController extends Controller
             // Add Trending first record
             if ($trendingCategory) {
                 $trendingImage = NgendevImage::where('category_id', $trendingCategory->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'image_path', 'category_id', 'no_of_image', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -305,6 +309,7 @@ class NgendevCategoryApiController extends Controller
         $encodedCategory = str_replace(' ', '%20', $category->category_name);
 
         $images = NgendevImage::where('category_id', $data['category_id'])
+            ->where('status', 1)
             ->select('id', 'image_path', 'ai_prompt', 'no_of_image', 'name_change', 'image_hint')
             ->orderBy('sort_order', 'asc')
             ->orderBy('id', 'asc')

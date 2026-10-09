@@ -275,6 +275,21 @@ class NgendevImageController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Image order updated successfully!']);
     }
+
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:ngendev_images,id',
+            'status' => 'required|boolean',
+        ]);
+
+        $image = NgendevImage::findOrFail($request->id);
+        $image->status = $request->status ? 1 : 0;
+        $image->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully!']);
+    }
+
     public function bulkToggleNameChange(Request $request)
     {
         $request->validate([
