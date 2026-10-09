@@ -44,6 +44,7 @@ class NgendevVideoApiController extends Controller
             $encodedCategory = str_replace(' ', '%20', $category->category_name);
 
             $videos = NgendevVideo::where('category_id', $category->id)
+                ->where('status', 1)
                 ->select('id', 'ai_prompt', 'video_thumbnail', 'video_path', 'no_of_video', 'name_change', 'image_hint')
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
@@ -195,6 +196,7 @@ class NgendevVideoApiController extends Controller
             // Get first video from each remaining category (same order as getAiVideoCategories)
             foreach ($categories as $category) {
                 $latestVideo = NgendevVideo::where('category_id', $category->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'video_thumbnail', 'video_path', 'category_id', 'no_of_video', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -227,6 +229,7 @@ class NgendevVideoApiController extends Controller
             // Add Exclusive first record
             if ($exclusiveCategory) {
                 $exclusiveVideo = NgendevVideo::where('category_id', $exclusiveCategory->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'video_thumbnail', 'video_path', 'category_id', 'no_of_video', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -259,6 +262,7 @@ class NgendevVideoApiController extends Controller
             // Add Trending first record
             if ($trendingCategory) {
                 $trendingVideo = NgendevVideo::where('category_id', $trendingCategory->id)
+                    ->where('status', 1)
                     ->select('id', 'ai_prompt', 'video_thumbnail', 'video_path', 'category_id', 'no_of_video', 'name_change', 'image_hint')
                     ->orderBy('sort_order', 'desc')
                     ->orderBy('id', 'desc')
@@ -319,6 +323,7 @@ class NgendevVideoApiController extends Controller
         $encodedCategory = str_replace(' ', '%20', $category->category_name);
 
         $videos = NgendevVideo::where('category_id', $data['category_id'])
+            ->where('status', 1)
             ->select('id', 'video_thumbnail', 'video_path', 'ai_prompt', 'no_of_video', 'name_change', 'image_hint')
             ->orderBy('sort_order', 'asc')
             ->orderBy('id', 'asc')

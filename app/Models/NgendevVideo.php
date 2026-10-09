@@ -11,7 +11,7 @@ class NgendevVideo extends Model
 
     protected $table = 'ngendev_videos';
 
-    protected $fillable = ['category_id', 'video_thumbnail', 'video_path', 'ai_prompt', 'ai_model', 'sort_order', 'no_of_video', 'name_change', 'image_hint'];
+    protected $fillable = ['category_id', 'video_thumbnail', 'video_path', 'ai_prompt', 'ai_model', 'sort_order', 'no_of_video', 'name_change', 'image_hint', 'status'];
 
     public function category()
     {

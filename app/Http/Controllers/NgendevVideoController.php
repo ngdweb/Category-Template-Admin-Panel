@@ -327,6 +327,20 @@ class NgendevVideoController extends Controller
         return response()->json(['success' => true, 'message' => 'Video order updated successfully!']);
     }
 
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:ngendev_videos,id',
+            'status' => 'required|boolean',
+        ]);
+
+        $video = NgendevVideo::findOrFail($request->id);
+        $video->status = $request->status ? 1 : 0;
+        $video->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully!']);
+    }
+
     public function bulkToggleNameChange(Request $request)
     {
         $request->validate([

@@ -206,6 +206,7 @@ Route::middleware(['admin_auth'])->group(function () {
             Route::post('/videos-update-order', [\App\Http\Controllers\NgendevVideoController::class, 'updateOrder'])->name('updateOrder');
             Route::get('/videos-name-change-stats', [\App\Http\Controllers\NgendevVideoController::class, 'categoryNameChangeStats'])->name('nameChangeStats');
             Route::post('/videos-bulk-name-change', [\App\Http\Controllers\NgendevVideoController::class, 'bulkToggleNameChange'])->name('bulkNameChange');
+            Route::post('/videos-update-status', [\App\Http\Controllers\NgendevVideoController::class, 'updateStatus'])->name('updateStatus');
         });
 
     /*

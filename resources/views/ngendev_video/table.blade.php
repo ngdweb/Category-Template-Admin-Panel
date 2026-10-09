@@ -3,13 +3,10 @@
         <thead>
             <tr>
                 <th>Category</th>
-                <th>Model</th>
                 <th>Thumbnail</th>
                 <th>Video</th>
                 <th>Prompt</th>
-                <th>No Of Video</th>
-                <th>Name Change</th>
-                <th>Image Hint</th>
+                <th>Status</th>
                 <th class="text-end">Actions</th>
             </tr>
         </thead>
@@ -17,7 +14,6 @@
             @forelse ($videos as $video)
                 <tr id="row-{{ $video->id }}">
                     <td><strong>{{ $video->category?->category_name ?? 'N/A' }}</strong></td>
-                    <td>{{ $video->ai_model ?? 'Ngendev Video' }}</td>
                     <td>
                         @if ($video->video_thumbnail)
                             <img loading="lazy" decoding="async" src="{{ asset('upload/ngendev/videos/' . ($video->category?->category_name ?? 'unknown') . '/video_thumbnail/' . $video->video_thumbnail) }}"
@@ -40,20 +36,14 @@
                             {{ $video->ai_prompt }}
                         </div>
                     </td>
-                    <td>{{ $video->no_of_video ?? $video->no_of_image }}</td>
                     <td>
-                        @if ($video->name_change)
-                            <span class="badge bg-success">Yes</span>
-                        @else
-                            <span class="badge bg-secondary">No</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if ($video->name_change && $video->image_hint)
-                            <div class="text-truncate" style="max-width:200px;" title="{{ $video->image_hint }}">{{ $video->image_hint }}</div>
-                        @else
-                            <span class="text-muted">-</span>
-                        @endif
+                        <div class="form-check form-switch d-flex align-items-center gap-2 m-0">
+                            <input class="form-check-input ngd-video-status-toggle" type="checkbox" role="switch"
+                                id="vid-status-{{ $video->id }}" data-id="{{ $video->id }}" {{ ($video->status ?? 1) ? 'checked' : '' }}>
+                            <span id="vid-status-badge-{{ $video->id }}" class="badge {{ ($video->status ?? 1) ? 'bg-success' : 'bg-secondary' }}">
+                                {{ ($video->status ?? 1) ? 'On' : 'Off' }}
+                            </span>
+                        </div>
                     </td>
                     <td class="text-end">
                         <div class="d-flex justify-content-end gap-2">
@@ -85,7 +75,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9">
+                    <td colspan="6">
                         <div class="empty-state">
                             <div class="empty-state-icon">
                                 <i class="bi bi-robot"></i>
