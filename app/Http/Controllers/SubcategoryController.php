@@ -717,7 +717,14 @@ class SubcategoryController extends Controller
     {
         $model = $this->getModel($request);
         $subcategory = $model::findOrFail($request->id);
-        $subcategory->trending = $request->trending;
+
+        // Published/Draft (status) and Trending are independent flags.
+        if ($request->has('status')) {
+            $subcategory->status = $request->status ? 1 : 0;
+        }
+        if ($request->has('trending')) {
+            $subcategory->trending = $request->trending ? 1 : 0;
+        }
         $subcategory->save();
 
         return response()->json(['success' => true]);

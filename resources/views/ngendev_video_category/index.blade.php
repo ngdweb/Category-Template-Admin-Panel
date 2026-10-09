@@ -279,6 +279,11 @@
             $('#confirmDelete').on('click', function () {
                 if (selectedCategoryId) {
                     document.getElementById(`deleteForm-${selectedCategoryId}`).submit();
+                    // The global handler routes the delete through AJAX (no page reload),
+                    // so close the confirm modal ourselves.
+                    const modalEl = document.getElementById('deleteModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (modal) modal.hide();
                 }
             });
 

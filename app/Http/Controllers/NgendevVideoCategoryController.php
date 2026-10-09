@@ -71,9 +71,7 @@ class NgendevVideoCategoryController extends Controller
         }
 
         $status = $request->has('status') ? 1 : 0;
-        if ($request->type === 'Solo') {
-            $status = 1;
-        } elseif ($request->type === 'Couple') {
+        if ($request->type === 'Couple') {
             $coupleActive = AiVideoNgdSetting::value('couple_active');
             if (!$coupleActive) {
                 $status = 0;
@@ -200,9 +198,7 @@ class NgendevVideoCategoryController extends Controller
         }
 
         $status = $request->has('status') ? $request->status : 0;
-        if ($request->type === 'Solo') {
-            $status = 1;
-        } elseif ($request->type === 'Couple') {
+        if ($request->type === 'Couple') {
             $coupleActive = AiVideoNgdSetting::value('couple_active');
             if (!$coupleActive) {
                 $status = 0;

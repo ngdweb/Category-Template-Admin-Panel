@@ -753,20 +753,20 @@
                                 </div>
                                 ${thumbUrl ?
                                     `<img src="${thumbUrl}"
-                                                 class="img-fluid rounded" style="height: 120px; object-fit: cover; width: 100%;"
+                                                 class="img-fluid rounded" style="height:200px;object-fit:contain;width:100%;background:#f8f9fa;"
                                                  alt="Image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                                                 style="height: 120px; display: none;">
+                                            <div class="bg-light rounded"
+                                                 style="height:200px;display:none;align-items:center;justify-content:center;">
                                                 <i class="bi bi-camera-video text-muted fs-4"></i>
                                             </div>` :
-                                    `<div class="bg-light rounded d-flex align-items-center justify-content-center"
-                                                 style="height: 120px;">
+                                    `<div class="bg-light rounded"
+                                                 style="height:200px;display:flex;align-items:center;justify-content:center;">
                                                 <i class="bi bi-camera-video text-muted fs-4"></i>
                                              </div>`
                                 }
                                 <div class="mt-2">
-                                    <small class="text-muted d-block" style="font-size: 0.75rem;">
-                                        ${image.ai_prompt ? image.ai_prompt.substring(0, 50) + '...' : 'No prompt'}
+                                    <small class="text-muted d-block fw-semibold" style="font-size: 0.8rem;" title="${(image.ai_prompt || '').replace(/"/g, '&quot;')}">
+                                        ${image.ai_prompt ? image.ai_prompt.substring(0, 60) + (image.ai_prompt.length > 60 ? '...' : '') : 'No prompt'}
                                     </small>
                                 </div>
                             </div>

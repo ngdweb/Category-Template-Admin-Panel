@@ -34,11 +34,11 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="form-check form-switch mb-0">
                                         <input class="form-check-input" type="checkbox" id="publishedToggle"
-                                            {{ $subcategory->trending ? 'checked' : '' }}
+                                            {{ ($subcategory->status ?? 1) ? 'checked' : '' }}
                                             style="width:3rem;height:1.5rem;cursor:pointer;">
                                     </div>
-                                    <span id="publishedLabel" class="fw-semibold {{ $subcategory->trending ? 'text-success' : 'text-secondary' }}">
-                                        {{ $subcategory->trending ? 'Published' : 'Draft' }}
+                                    <span id="publishedLabel" class="fw-semibold {{ ($subcategory->status ?? 1) ? 'text-success' : 'text-secondary' }}">
+                                        {{ ($subcategory->status ?? 1) ? 'Published' : 'Draft' }}
                                     </span>
                                 </div>
                             </div>
@@ -390,34 +390,21 @@
 
         if (publishedToggle) {
             publishedToggle.addEventListener('change', function () {
-                const newTrending = this.checked ? 1 : 0;
+                const newStatus = this.checked ? 1 : 0;
 
                 fetch(updateStatusUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ id: {{ $subcategory->id }}, trending: newTrending, origin: currentOrigin })
+                    body: JSON.stringify({ id: {{ $subcategory->id }}, status: newStatus, origin: currentOrigin })
                 })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        publishedLabel.textContent = newTrending ? 'Published' : 'Draft';
-                        publishedLabel.className = 'fw-semibold ' + (newTrending ? 'text-success' : 'text-secondary');
-
-                        // Sync the Trending Status badge on the same page
-                        const badge = document.getElementById('trendingStatusBadge');
-                        if (badge) {
-                            badge.className = 'badge cursor-pointer ' + (newTrending ? 'bg-success' : 'bg-secondary');
-                            badge.innerText = newTrending ? 'Trending' : 'Not Trending';
-                            badge.setAttribute('onclick', 'toggleTrendingStatus(' + {{ $subcategory->id }} + ', ' + newTrending + ')');
-                        }
-
-                        // Opposition: when Published ON, turn all currently-published siblings to Draft
-                        if (newTrending === 1) {
-                            trendingSiblingIds.forEach(function (sibId) { setTrendingOff(sibId); });
-                        }
+                        publishedLabel.textContent = newStatus ? 'Published' : 'Draft';
+                        publishedLabel.className = 'fw-semibold ' + (newStatus ? 'text-success' : 'text-secondary');
 
                         const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
-                        Toast.fire({ icon: 'success', title: newTrending ? 'Set to Published' : 'Set to Draft' });
+                        Toast.fire({ icon: 'success', title: newStatus ? 'Set to Published' : 'Set to Draft' });
                     } else {
                         publishedToggle.checked = !publishedToggle.checked;
                         Swal.fire('Error', 'Failed to update status', 'error');

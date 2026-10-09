@@ -126,9 +126,7 @@
                             {{ old('status', $category->status ?? 1) ? 'checked' : '' }}>
                         <label class="form-check-label" for="status">Active Status</label>
                     </div>
-                    <small class="text-muted" id="status-help">
-                        Solo categories are always active.
-                    </small>
+                    <small class="text-muted" id="status-help" style="display:none;"></small>
                 </div>
 
                 @include('notifications._after_save_toggle', ['inlineNotification' => true])
@@ -173,29 +171,76 @@
             const statusHelp = document.getElementById('status-help');
 
             function updateStatusVisibility(isTypeChange) {
-                if (typeSelect.value === 'Solo') {
-                    statusCheck.checked = true;
-                    statusCheck.disabled = true;
-                    statusHelp.textContent = 'Solo categories are always active.';
-                    statusHelp.style.display = 'block';
-                } else {
-                    // Couple
+                if (typeSelect.value === 'Couple') {
                     if (!COUPLE_ACTIVE) {
+                        // Global couple is OFF — a Couple category cannot be active, so lock the toggle OFF
                         statusCheck.checked = false;
                         statusCheck.disabled = true;
-                        statusHelp.textContent = 'Global Couple Status is OFF — this category will be saved as inactive.';
+                        statusHelp.textContent = 'Couple categories cannot be active while global Couple Status is OFF.';
                     } else {
                         statusCheck.disabled = false;
                         if (isTypeChange) statusCheck.checked = true;
                         statusHelp.textContent = 'Global Couple Status is ON — you can set this category active or inactive.';
                     }
                     statusHelp.style.display = 'block';
+                } else {
+                    // Solo — freely controllable
+                    statusCheck.disabled = false;
+                    statusHelp.style.display = 'none';
                 }
             }
 
             typeSelect.addEventListener('change', function() { updateStatusVisibility(true); });
 
             updateStatusVisibility(false);
+
+            // Submit via AJAX so a validation error (e.g. duplicate name) never reloads
+            // the page and wipes the already-selected category image.
+            const categoryForm = document.getElementById('categoryForm');
+            if (categoryForm) {
+                categoryForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const submitBtn = categoryForm.querySelector('button[type="submit"]');
+                    const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                    }
+                    const restoreBtn = function () {
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalHtml; }
+                    };
+
+                    fetch(categoryForm.action, {
+                        method: 'POST',
+                        body: new FormData(categoryForm),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        redirect: 'manual',
+                        credentials: 'same-origin'
+                    }).then(function (response) {
+                        if (response.status === 422) {
+                            // Validation error — show it and keep the form (image stays selected).
+                            return response.json().then(function (data) {
+                                const msgs = (data && data.errors)
+                                    ? Object.values(data.errors).flat()
+                                    : [(data && data.message) ? data.message : 'Validation failed.'];
+                                Swal.fire({ icon: 'error', title: 'Please fix the following', html: msgs.join('<br>') });
+                                restoreBtn();
+                                return null;
+                            });
+                        }
+                        // Success: controller redirected to the list (opaqueredirect) or returned OK.
+                        if (response.type === 'opaqueredirect' || response.status === 0 || response.ok) {
+                            window.location.href = "{{ route('ngendev-video-categories.index') }}";
+                            return null;
+                        }
+                        throw new Error('HTTP ' + response.status);
+                    }).catch(function (err) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: (err && err.message) || 'Something went wrong. Please try again.' });
+                        restoreBtn();
+                    });
+                });
+            }
         });
     </script>
 @endsection

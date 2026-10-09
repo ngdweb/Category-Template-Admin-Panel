@@ -153,6 +153,7 @@ class CategoryController extends Controller
         foreach ($activeCategories as $category) {
 
             $subcategories = Subcategory::where('category_name', $category)
+                ->where('status', 1) // Published only — exclude Draft subcategories
                 ->orderBy('id', 'desc')
                 // Limit to 6 records
                 ->limit(4)
