@@ -47,7 +47,8 @@ class AiBabyVideoController extends Controller
 
     public function create()
     {
-        $categories = AiVideoCategory::where('status', 1)->get();
+        // Show all categories (including inactive) so videos can be added to any category.
+        $categories = AiVideoCategory::orderBy('category_name')->get();
         return view('ai_baby_video.videos.form', compact('categories'));
     }
 
@@ -108,9 +109,15 @@ class AiBabyVideoController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errors = collect($e->errors())->map(fn($msgs) => $msgs[0])->values()->implode(' | ');
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $errors, 'errors' => $e->errors()], 422);
+            }
             return redirect()->back()->withInput()->with('error', $errors)->withErrors($e->errors());
 
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Something went wrong while adding the video. Please try again.'], 500);
+            }
             return redirect()->back()->withInput()->with('error', 'Something went wrong while adding the video. Please try again.');
         }
     }
@@ -118,7 +125,8 @@ class AiBabyVideoController extends Controller
     public function edit($id)
     {
         $video = AiBabyVideo::findOrFail($id);
-        $categories = AiVideoCategory::where('status', 1)->get();
+        // Show all categories (including inactive) so the current one always appears and videos can be added to any category.
+        $categories = AiVideoCategory::orderBy('category_name')->get();
         return view('ai_baby_video.videos.form', compact('video', 'categories'));
     }
 
@@ -227,9 +235,15 @@ class AiBabyVideoController extends Controller
 
       } catch (\Illuminate\Validation\ValidationException $e) {
           $errors = collect($e->errors())->map(fn($msgs) => $msgs[0])->values()->implode(' | ');
+          if ($request->ajax() || $request->expectsJson()) {
+              return response()->json(['success' => false, 'message' => $errors, 'errors' => $e->errors()], 422);
+          }
           return redirect()->back()->withInput()->with('error', $errors)->withErrors($e->errors());
 
       } catch (\Exception $e) {
+          if ($request->ajax() || $request->expectsJson()) {
+              return response()->json(['success' => false, 'message' => 'Something went wrong while updating the video. Please try again.'], 500);
+          }
           return redirect()->back()->withInput()->with('error', 'Something went wrong while updating the video. Please try again.');
       }
     }

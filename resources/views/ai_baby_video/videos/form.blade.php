@@ -319,6 +319,8 @@
         // Validate everything the server requires BEFORE submitting, so a server
         // reject never reloads the page and wipes the already-selected video/thumbnail.
         form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
             const categoryInput = document.getElementById('category_id');
             const videoInput = document.getElementById('video_path');
             const thumbInput = document.getElementById('video_thumbnail');
@@ -353,13 +355,53 @@
             }
 
             if (errs.length) {
-                e.preventDefault();
                 Swal.fire({
                     icon: 'error',
                     title: 'Please complete the form',
                     html: errs.join('<br>')
                 });
+                return;
             }
+
+            // Submit via AJAX so a server error never reloads the page and wipes
+            // the already-selected video / thumbnail (or their existing previews).
+            const submitBtn = document.getElementById('submitBtn');
+            const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            }
+            const restoreBtn = function () {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalHtml; }
+            };
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                redirect: 'manual',
+                credentials: 'same-origin'
+            }).then(function (response) {
+                if (response.status === 422 || response.status === 500) {
+                    return response.json().then(function (data) {
+                        const msgs = (data && data.errors)
+                            ? Object.values(data.errors).flat()
+                            : [(data && data.message) ? data.message : 'Failed to save.'];
+                        Swal.fire({ icon: 'error', title: 'Please fix the following', html: msgs.join('<br>') });
+                        restoreBtn();
+                        return null;
+                    });
+                }
+                // Success: controller redirected to the list.
+                if (response.type === 'opaqueredirect' || response.status === 0 || response.ok) {
+                    window.location.href = "{{ route('ai-baby-video.videos.index') }}";
+                    return null;
+                }
+                throw new Error('HTTP ' + response.status);
+            }).catch(function (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: (err && err.message) || 'Something went wrong. Please try again.' });
+                restoreBtn();
+            });
         });
     });
 </script>
