@@ -20,9 +20,14 @@ class JwtTokenAuth
 
         $clientToken = trim(str_replace('Bearer', '', $authHeader));
 
-        $validToken = env('MY_JWT_TOKEN');
+        // Accept the existing (old) token plus any additional tokens, all read from env,
+        // so multiple tokens keep working. The old token and the API responses are unchanged.
+        $validTokens = array_filter([
+            env('MY_JWT_TOKEN'),
+            env('MY_JWT_TOKEN_2'),
+        ]);
 
-        if ($clientToken !== $validToken) {
+        if (!in_array($clientToken, $validTokens, true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized: Invalid token.',

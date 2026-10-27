@@ -1182,6 +1182,7 @@
         })();
     </script>
     @yield('scripts')
+    <script src="{{ asset('js/admin-media-protect.js') }}?v={{ @filemtime(public_path('js/admin-media-protect.js')) ?: '1' }}"></script>
 </body>
 
 </html>

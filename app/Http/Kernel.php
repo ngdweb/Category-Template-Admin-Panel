@@ -48,6 +48,7 @@ class Kernel extends HttpKernel
         ],
         'admin_auth' => [
             \App\Http\Middleware\AdminAuth::class,
+            \App\Http\Middleware\ProtectAdminMediaUrls::class,
         ],
     ];
 

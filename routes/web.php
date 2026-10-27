@@ -49,6 +49,9 @@ Route::middleware(['admin_auth'])->group(function () {
         return view('apiList');
     });
 
+    // Secure media streaming — serves a file only via an opaque, expiring token (no real path exposed).
+    Route::get('/secure-media', [\App\Http\Controllers\SecureMediaController::class, 'stream'])->name('secure-media');
+
     Route::post('/logout', [AdminController::class, 'logout'])->name('auth.logout');
 
     // Maintenance Routes
